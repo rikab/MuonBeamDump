@@ -11,7 +11,7 @@ import os.path
 warnings.filterwarnings('ignore')
 
 
-def calculate_event_yields(config):
+def calculate_event_yields(config, force_rerun=False):
 
     # #########################################
     # ########## STEP 0: Config File ##########
@@ -51,6 +51,8 @@ def calculate_event_yields(config):
     run_WW = config["WW"]
     cross_section_file = config["Cross Sections File"]
     experiment_dir = config["Experiment Directory"]
+    plot_mrange = config["m_range"]
+    plot_erange = config["e_range"]
 
     if run_IWW:
         cross_section_dict = np.load(f"{cross_section_file}.npy", allow_pickle=True)[()]
@@ -67,7 +69,7 @@ def calculate_event_yields(config):
     hbarc = .197  # GeV fm
     hbarc_cm_invGeV2 = hbarc * 1e-13
     N_A = 6e23  # Avagadros number (mol^-1)
-    maximum_exponent = 250
+    maximum_exponent = 100
 
     l_target = l_target * 100  # Target Length (cm)
     l_detector = l_detector * 100  # Detector Length (cm)
@@ -106,7 +108,7 @@ def calculate_event_yields(config):
         kinematic_factor = m_X * np.nan_to_num(np.sqrt(1 - 4 * m_l**2 / m_X**2)**3)
         return prefactor * kinematic_factor
 
-    decay_widths = [scalar_decay_width, pseudoscalar_decay_width, vector_decay_width, axial_vector_decay_width]
+    decay_widths = {"Scalar": scalar_decay_width, "Pseudoscalar": pseudoscalar_decay_width, "Vector": vector_decay_width, "Axial Vector": axial_vector_decay_width}
 
     # Helper function to read PDG Data files
 
@@ -144,17 +146,30 @@ def calculate_event_yields(config):
 
         total_decay_width = 0
         for decay in decay_dictionary:
-            weight, mass = decay_dictionary[decay]
+            weight, mass, visibility = decay_dictionary[decay]
             if decay == "hadrons":
                 weight = Rpp(m_X) * weight
             total_decay_width += weight * decay_width(m_X, epsilon, mass)
 
         return 1e-15 * hbarc * gamma / total_decay_width
 
+    def visible_branching_ratio(decay_width, x, m_X, epsilon):
 
-# ####################################################
-# ########## STEP 2: Calculate Event Yields ##########
-# ####################################################
+        total_decay_width = 0
+        visible_decay_width = 0
+        for decay in decay_dictionary:
+            weight, mass, visibility = decay_dictionary[decay]
+            if decay == "hadrons":
+                weight = Rpp(m_X) * weight
+            w = decay_width(m_X, epsilon, mass)
+            total_decay_width += weight * w
+            visible_decay_width += weight * w * visibility
+
+        return visible_decay_width / total_decay_width
+
+    # ####################################################
+    # ########## STEP 2: Calculate Event Yields ##########
+    # ####################################################
 
     # Function to interpolate (in log scale) the cross section between two pre-calculated mass points
 
@@ -163,8 +178,14 @@ def calculate_event_yields(config):
         if x > x_max:
             return 0
 
+        # # return floor
+        # for (i, m) in enumerate(m_Xs):
+        #     if m > m_X:
+        #         return (x > m_X / E_0) * dx * np.nan_to_num(cross_sections[i-1][int(x * xbins)-1])
+        # return (x > m_X / E_0) * dx * np.nan_to_num(cross_sections[-1][int(x * xbins)-1])
+
         # logarithmic interpolation
-        return (x > m_X / E_0) * dx * np.interp(m_X, m_Xs, np.nan_to_num([cross_sections[i][int(x * xbins)-1] for i in range(len(cross_sections))]))
+        return (x > m_X / E_0) * dx * np.interp(np.log(m_X), np.log(m_Xs), np.nan_to_num([cross_sections[i][int(x * xbins)-1] for i in range(len(m_Xs))]))
 
     # numpy-vectorized function to approximate log[exp(x)-1] when x is either very large or very small
 
@@ -199,8 +220,8 @@ def calculate_event_yields(config):
 
         length = decay_length(Gamma, x, m_X, epsilon) * 100  # cm
 
-        term1 = np.nan_to_num(np.log(target_density * length / target_A * hbarc_cm_invGeV2**2))
-        term2 = np.nan_to_num(np.log(interpolate_cross_section(x, m_X, cross_sections)))
+        term1 = 1*np.nan_to_num(np.log(target_density * length / target_A * hbarc_cm_invGeV2**2))
+        term2 = 0*np.nan_to_num(np.log(interpolate_cross_section(x, m_X, cross_sections)))
 
         term3 = np.nan_to_num(approximate_log_exp_minus_1(l_target / length, maximum_exponent, 1))
         term4 = np.nan_to_num(-1 * (l_target + l_shield) / length)
@@ -219,7 +240,10 @@ def calculate_event_yields(config):
         events = np.zeros_like(m_X)
         for (i, x) in tqdm(enumerate(xs)):
 
+            # if x >= 0.5 and x < 0.504:
+
             length = decay_length(width, x, m_X, epsilon) * 100  # cm
+            visibility = visible_branching_ratio(width, x, m_X, epsilon)
             experiment_lengthscale = l_detector + l_shield + l_target
 
             # Check to make sure that the decay length is both positive and not too big
@@ -227,44 +251,38 @@ def calculate_event_yields(config):
 
             numerical_check = numerical_check_3
             dNdX = log_normalized_dNdx(N_mu, x, m_X, epsilon, width, cross_section_dict[case])
-            events += numerical_check * np.exp((np.nan_to_num(dNdX)))
+            events += numerical_check * np.exp((np.nan_to_num(dNdX))) * visibility * interpolate_cross_section(x, m_X, cross_section_dict[case])
         return N_A * N_mu * events
 
     # ############################################
     # ########## STEP 3: Run Everything ##########
     # ############################################
 
-    m_X_logspace = np.logspace(-2, 1.2, 250)
-    epsilon_logspace = np.logspace(-10, -2, 250)
+    m_X_logspace = np.logspace(plot_mrange[0], plot_mrange[1], 100)
+    epsilon_logspace = np.logspace(plot_erange[0], plot_erange[1], 100)
 
-    m_X_linspace = np.linspace(-2, 1.2, 250)
-    epsilon_linspace = np.linspace(-10, -2, 250)
+    m_X_linspace = np.linspace(plot_mrange[0], plot_mrange[1], 100)
+    epsilon_linspace = np.linspace(plot_erange[0], plot_erange[1], 100)
 
     M, E = np.meshgrid(m_X_logspace, epsilon_logspace)
     Mlin, Elin = np.meshgrid(m_X_linspace, epsilon_linspace)
 
     print(f"Checking for existing event yield data at {config['Event Yields File']}.npy ...")
 
-    if not os.path.isfile(f"{config['Event Yields File']}.npy"):
+    if not os.path.isfile(f"{config['Event Yields File']}.npy") or force_rerun:
 
         print(f"Could not find existing event yield data for the specified experiment, calculating now ...")
 
         # Calculate everything
-        scalar_events = E**2 * compute_events(N_mu, M, E, scalar_decay_width, cases[0])
-        psuedoscalar_events = E**2 * compute_events(N_mu, M, E, pseudoscalar_decay_width, cases[1])
-        vector_events = E**2 * compute_events(N_mu, M, E, vector_decay_width, cases[2])
-        axial_vector_events = E**2 * compute_events(N_mu, M, E, axial_vector_decay_width, cases[3])
-
-        events_dict = {
-            "Scalar": scalar_events,
-            "Pseudoscalar": psuedoscalar_events,
-            "Vector": vector_events,
-            "Axial Vector": axial_vector_events,
-        }
+        events_dict = {}
+        for case in cases:
+            events = E**2 * compute_events(N_mu, M, E, decay_widths[case], case)
+            events_dict[case] = events
 
         np.save(config["Event Yields File"], events_dict)
 
     else:
+
         print(f"Found existing event yield data for the specified experiment, no need to recalculate!")
 
     print(f"Event yields for {config['Target Name']} with target, shield, detector lengths of {int(l_target/100)}m, {int(l_shield/100)}m, {int(l_detector/100)}m, at {E_0} GeV are available!")

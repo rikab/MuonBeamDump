@@ -4,7 +4,7 @@ import os.path
 # Experiment config file
 
 
-def build_full_config(run_WW, xbins, cases, m_Xs, cross_section_dir, experiment_dir, E_0, m_lepton, theta_max, target_name, target_Z, target_A, target_density, target_length, shield_length, detector_length, model_name_string, decay_dictionary, N_mu):
+def build_full_config(run_WW, xbins, cases, m_Xs, cross_section_dir, experiment_dir, E_0, m_lepton, theta_max, target_name, target_Z, target_A, target_density, target_length, shield_length, detector_length, model_name_string, decay_dictionary, N_mu, mrange, erange,):
 
     config = {
 
@@ -33,6 +33,8 @@ def build_full_config(run_WW, xbins, cases, m_Xs, cross_section_dir, experiment_
         "Decays": decay_dictionary,
 
         "N_mu": N_mu,
+        "m_range": mrange,
+        "e_range": erange,
     }
 
     # Directories
