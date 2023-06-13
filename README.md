@@ -1,8 +1,14 @@
 # Muon Beam Dump Calculations
-### v0.0.1
+### v0.0.2
 
 Code by Rikab Gambhir
 In collaboration with Samuel Alipour-fard and Cari Cesarotti 
+
+# Usage
+
+For the full analysis pipeline, see `muon_beam_dump.ipynb`. This pipeline automates cross section calculations, event yield calculations, and contour plot making.
+
+For the specific models considered in `XXXX.XXXX`, and to reproduce all result plots within the paper, see the notebook `models.ipynb`.
 
 # For Cari and Sam:
 
@@ -24,4 +30,5 @@ Only standard python dependices (numpy, matplotlib, etc) are used. You may need 
 
 
 # Changelog
+v0.0.2: 13 June 2023. Exclusion plots.
 v0.0.1: 30 May 2023. Uploaded to private repo.
