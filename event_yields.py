@@ -140,7 +140,7 @@ def calculate_event_yields(config, force_rerun=False):
 
     # Return the decay length of a particle with energy fraction x, mass m_X, coupling epsilon, in meters
 
-    def decay_length(decay_width, x, m_X, epsilon):
+    def decay_length(decay_width, x, m_X, epsilon, decay_dictionary):
 
         gamma = (x * E_0) / m_X
 
@@ -153,7 +153,7 @@ def calculate_event_yields(config, force_rerun=False):
 
         return 1e-15 * hbarc * gamma / total_decay_width
 
-    def visible_branching_ratio(decay_width, x, m_X, epsilon):
+    def visible_branching_ratio(decay_width, x, m_X, epsilon, decay_dictionary):
 
         total_decay_width = 0
         visible_decay_width = 0
@@ -218,7 +218,7 @@ def calculate_event_yields(config, force_rerun=False):
         if x > x_max:
             return -99999
 
-        length = decay_length(Gamma, x, m_X, epsilon) * 100  # cm
+        length = decay_length(Gamma, x, m_X, epsilon, decay_dictionary) * 100  # cm
 
         term1 = 1*np.nan_to_num(np.log(target_density * length / target_A * hbarc_cm_invGeV2**2))
         term2 = 0*np.nan_to_num(np.log(interpolate_cross_section(x, m_X, cross_sections)))
@@ -242,8 +242,8 @@ def calculate_event_yields(config, force_rerun=False):
 
             # if x >= 0.5 and x < 0.504:
 
-            length = decay_length(width, x, m_X, epsilon) * 100  # cm
-            visibility = visible_branching_ratio(width, x, m_X, epsilon)
+            length = decay_length(width, x, m_X, epsilon, decay_dictionary) * 100  # cm
+            visibility = visible_branching_ratio(width, x, m_X, epsilon, decay_dictionary)
             experiment_lengthscale = l_detector + l_shield + l_target
 
             # Check to make sure that the decay length is both positive and not too big
@@ -258,11 +258,11 @@ def calculate_event_yields(config, force_rerun=False):
     # ########## STEP 3: Run Everything ##########
     # ############################################
 
-    m_X_logspace = np.logspace(plot_mrange[0], plot_mrange[1], 100)
-    epsilon_logspace = np.logspace(plot_erange[0], plot_erange[1], 100)
+    m_X_logspace = np.logspace(plot_mrange[0], plot_mrange[1], 250)
+    epsilon_logspace = np.logspace(plot_erange[0], plot_erange[1], 250)
 
-    m_X_linspace = np.linspace(plot_mrange[0], plot_mrange[1], 100)
-    epsilon_linspace = np.linspace(plot_erange[0], plot_erange[1], 100)
+    m_X_linspace = np.linspace(plot_mrange[0], plot_mrange[1], 250)
+    epsilon_linspace = np.linspace(plot_erange[0], plot_erange[1], 250)
 
     M, E = np.meshgrid(m_X_logspace, epsilon_logspace)
     Mlin, Elin = np.meshgrid(m_X_linspace, epsilon_linspace)

@@ -6,9 +6,15 @@ In collaboration with Samuel Alipour-fard and Cari Cesarotti
 
 # Usage
 
-For the full analysis pipeline, see `muon_beam_dump.ipynb`. This pipeline automates cross section calculations, event yield calculations, and contour plot making.
+For the full analysis pipeline, see `muon_beam_dump.ipynb`. This pipeline automates cross section calculations, event yield calculations, and contour plot making. Within this notebook, you can set analysis config parameters.
 
-For the specific models considered in `XXXX.XXXX`, and to reproduce all result plots within the paper, see the notebook `models.ipynb`.
+For the specific models considered in `XXXX.XXXX`, and to reproduce all result plots within the paper, see the notebook `models.ipynb`. Previous exclusion limit datafiles can be placed in the OtherSearchesDigitized directory, some of which are included in this repository.
+
+The material property studies performed in this appendix can be reproduced with the notebooks `material_properties.ipynb` and `radiation
+.ipynb`. The former is for the material property studies in the main text, and the latter is for the material property studies in the appendix.
+
+
+
 
 # For Cari and Sam:
 

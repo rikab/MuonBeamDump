@@ -18,7 +18,7 @@ warnings.filterwarnings('ignore')
 # np.save(config["Config Directory"], config)
 
 
-def calculate_cross_sections(config):
+def calculate_cross_sections(config, force_rerun=False):
 
     # #########################################
     # ########## STEP 0: Config File ##########
@@ -103,7 +103,7 @@ def calculate_cross_sections(config):
         def integrand(t):
             return (t - t_min) * g2(t) / t**2
 
-        return integrate.quad(integrand, t_min, t_max, epsabs=1.5e-3, epsrel=1.5e-3, limit=125)[0]
+        return integrate.quad(integrand, t_min, t_max, epsabs=1.5e-6, epsrel=1.5e-6, limit=600)[0]
 
     # ###############################################
     # ######### STEP 2: Squared Amplitudes ##########
@@ -185,7 +185,7 @@ def calculate_cross_sections(config):
         def integrand(u):
             return A(u, x, m_X) / u**2
 
-        return integrate.quad(integrand, -np.infty, u_max, epsabs=1.5e-6, epsrel=1.5e-6, limit=250)[0]
+        return integrate.quad(integrand, -np.infty, u_max, epsabs=1.5e-9, epsrel=1.5e-9, limit=500)[0]
 
     # IWW Combine integrated squared ampitude with prefactors and photon flux
 
@@ -228,7 +228,7 @@ def calculate_cross_sections(config):
         # multiplying beta by x to get |k|/E_0 factor
         flux = 2 * 1**2 * alpha_EM**3 * beta(x * E_0, m_X) * x * E_0**2 * (1-x)
         theta_0 = min(theta_max, 10 * np.sqrt(m_lepton**2 + (1-x)*m_X**2 / x**2) / E_0)
-        return flux * integrate.quad(integrand, 0, theta_0, epsabs=1.5e-6, epsrel=1.5e-6, limit=125)[0]
+        return flux * integrate.quad(integrand, 0, theta_0, epsabs=1.5e-9, epsrel=1.5e-9, limit=500)[0]
 
     # ############################################
     # ########## STEP 4: Run everything ##########
@@ -240,7 +240,7 @@ def calculate_cross_sections(config):
     if run_IWW:
 
         # Open previous dictionary file, if it exists.
-        if os.path.isfile(f"{config['Cross Sections File']}.npy"):
+        if os.path.isfile(f"{config['Cross Sections File']}.npy") and not force_rerun:
             cross_section_dict = np.load(f"{config['Cross Sections File']}.npy", allow_pickle=True)[()]
             print(f"Found existing IWW cross section data for {config['Target Name']} at {E_0} GeV, no need to recalculate!")
         else:
@@ -271,7 +271,7 @@ def calculate_cross_sections(config):
         print(f"Checking for existing WW cross section data at {config['Cross Sections File']}_WW.npy ...")
 
         # Open previous dictionary file, if it exists.
-        if os.path.isfile(f"{config['Cross Sections File']}_WW.npy"):
+        if os.path.isfile(f"{config['Cross Sections File']}_WW.npy") and not force_rerun:
             cross_section_dict = np.load(f"{config['Cross Sections File']}_WW.npy", allow_pickle=True)[()]
             print(f"Found existing WW cross section data for {config['Target Name']} at {E_0} GeV, no need to recalculate!")
 
