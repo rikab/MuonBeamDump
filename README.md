@@ -14,6 +14,7 @@ For the full analysis pipeline, see `muon_beam_dump.ipynb`. This pipeline automa
 
 For the specific models considered in `XXXX.XXXX`, and to reproduce all result plots within the paper, see the notebook `models.ipynb`. Previous exclusion limit datafiles can be placed in the OtherSearchesDigitized directory, some of which are included in this repository.
 
+To reproduce the cross section plots specifically, see `cross_section_plots.ipynb`. To regenerate the cross section datafiles, see `cross_sections.py`, which can also be run within `muon_beam_dump.ipynb`. 
 
 The material property studies performed in this appendix can be reproduced with the notebooks `material_properties.ipynb` and `radiation.ipynb`. The former is for the material property studies in the main text, and the latter is for the material property studies in the appendix.
 
