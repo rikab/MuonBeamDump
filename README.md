@@ -1,8 +1,11 @@
-# Muon Beam Dump Calculations
-### v0.0.2
+# Muon Beam Dump Calculations and Plots
+### v0.0.3
 
 Code by Rikab Gambhir
 In collaboration with Cari Cesarotti
+
+<!-- Image -->
+![Example plot](exclusions_Vector_e5000.pdf)
 
 # Usage
 
@@ -18,6 +21,8 @@ The material property studies performed in this appendix can be reproduced with 
 # Dependencies
 
 Only standard python dependices (numpy, matplotlib, etc) are used. You may need to `pip install tqdm` which is a less-common python package for loading bars.
+
+The major dependencies can be installed with `pip install -r requirements.txt`.
 
 
 # Changelog
