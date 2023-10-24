@@ -116,6 +116,6 @@ cmaps = {"red": red_cmap,
 energy_strings = {0.01 : "10 MeV",
                   0.1 : "100 MeV",
                   10 : "10 GeV",
-                  63 : "$m_H/2$",
+                  63 : "$m_h/2$",
                   1500 : "1.5 TeV",
                   5000 : "5 TeV",}
