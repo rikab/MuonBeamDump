@@ -26,6 +26,6 @@ The major dependencies can be installed with `pip install -r requirements.txt`.
 
 
 # Changelog
-v0.0.3: 23 October 2023. Public release.
-v0.0.2: 13 June 2023. Exclusion plots.
-v0.0.1: 30 May 2023. Uploaded to private repo.
+* v0.0.3: 23 October 2023. Public release.
+* v0.0.2: 13 June 2023. Exclusion plots.
+* v0.0.1: 30 May 2023. Uploaded to private repo.
