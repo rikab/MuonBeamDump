@@ -5,7 +5,7 @@ Code by Rikab Gambhir
 In collaboration with Cari Cesarotti
 
 <!-- Image -->
-![Example plot](exclusions_Vector_e5000.pdf)
+![Example plot](example_image.png)
 
 # Usage
 

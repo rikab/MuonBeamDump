@@ -3,6 +3,3 @@ tex/*
 junk/*
 OtherSearchesDigitized/*
 
-# Allow exclusions_Vector_e5000.pdf
-!exclusions_Vector_e5000.pdf
-```
